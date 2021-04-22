@@ -208,25 +208,22 @@ game_over = False
 
 pygame.init()
 nb_player = -1
+#0: AI vs AI || 1: Player vs AI || 2: Player vs Player
 while nb_player < 0 or nb_player > 2:
 	nb_player = int(input("Nombre de joueur :"))
+#Implémentation graphique
 SQUARESIZE = 100
-
 width = COLUMN_COUNT * SQUARESIZE
 height = (ROW_COUNT+1) * SQUARESIZE
-
 size = (width, height)
-
 RADIUS = int(SQUARESIZE/2 - 5)
-
 screen = pygame.display.set_mode(size)
 draw_board(board)
 pygame.display.update()
-
 myfont = pygame.font.SysFont("monospace", 75)
-
+#utilisation du random pour savoir qui commence
 turn = random.randint(PLAYER, AI)
-
+#Lancement du jeu
 while not game_over:
 
 	for event in pygame.event.get():
@@ -250,7 +247,7 @@ while not game_over:
 					posx = event.pos[0]
 					col = int(math.floor(posx/SQUARESIZE))
 				else :
-					col, minimax_score = minimax(board, 5, math.inf, -math.inf, True)
+					col, minimax_score = minimax(board, 5, -math.inf, math.inf, True)
 
 				if is_valid_location(board, col):
 					row = get_next_open_row(board, col)
