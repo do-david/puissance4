@@ -202,10 +202,64 @@ def draw_board(board):
 				pygame.draw.circle(screen, YELLOW, (int(c*SQUARESIZE+SQUARESIZE/2), height-int(r*SQUARESIZE+SQUARESIZE/2)), RADIUS)
 	pygame.display.update()
 
+def text_objects(text, font):
+    textSurface = font.render(text, True, black)
+    return textSurface, textSurface.get_rect()
+
+def game_intro():
+    intro = True
+    startClicked = False
+    while intro:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                quit()
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                if width/2 <= mouse[0] <= width/2+140 and (height/2) <= mouse[1] <= (height/2)+140:
+                    print('start button clicked')
+                    startClicked = True
+                    continue
+                if width/5 <= mouse[0] <= width/5+100 and (height/4) <= mouse[1] <= (height*3/4)+100 and startClicked:
+                    print('this is easy')
+                    intro = False
+                if width/2 <= mouse[0] <= width/2+100 and (height*3/4) <= mouse[1] <= (height*3/4)+100 and startClicked:
+                    print('this is medium')
+                    intro = False
+                if width*4/5 <= mouse[0] <= width*4/5+100 and (height/4) <= mouse[1] <= (height*3/4)+100 and startClicked:
+                    print('this is easy')
+                    intro = False
+        pygame.display.update()
+        if(startClicked):
+            print('condition valid')
+            smallText = pygame.font.Font('freesansbold.ttf',35)
+            Text1Surf, Text1Rect = text_objects("Easy", smallText)
+            Text2Surf, Text2Rect = text_objects("Medium", smallText)
+            Text3Surf, Text3Rect = text_objects("Hard", smallText)
+            Text1Rect.center = ((width/5),(height*3/4))
+            Text2Rect.center = ((width/2),(height*3/4))
+            Text3Rect.center = ((width*4/5),(height*3/4))
+            screen.blit(Text1Surf, Text1Rect)
+            screen.blit(Text2Surf, Text2Rect)
+            screen.blit(Text3Surf, Text3Rect)
+        pygame.display.update()
+        mouse = pygame.mouse.get_pos()
+        screen.fill(white)
+        largeText = pygame.font.Font('freesansbold.ttf',115)
+        mediumText = pygame.font.Font('freesansbold.ttf',65)
+        TextSurf, TextRect = text_objects("Puissance 4", largeText)
+        TextRect.center = ((width/2),(height/4))
+        screen.blit(TextSurf, TextRect)
+        ButtonSurf, ButtonRect = text_objects("Start", mediumText)
+        ButtonRect.center = ((width/2),(height/2))
+        screen.blit(ButtonSurf, ButtonRect)
+        pygame.display.update()
+        
+pygame.display.set_caption('Puissance 4')
+black = (0,0,0)
+white = (255,255,255)
 board = create_board()
 print_board(board)
 game_over = False
-
 pygame.init()
 lvl = -1
 nb_player = -1
@@ -213,8 +267,8 @@ nb_player = -1
 while nb_player < 0 or nb_player > 2:
 	nb_player = int(input("Nombre de joueur :"))
 #Choix du niveau
-while lvl < 1 or lvl > 10:
-	lvl = int(input("Choix du niveau de difficulte (1-10):"))
+while lvl < 1 or lvl > 6:
+	lvl = int(input("Choix du niveau de difficulte (1-6):"))
 
 #Implémentation graphique
 SQUARESIZE = 100
@@ -223,9 +277,11 @@ height = (ROW_COUNT+1) * SQUARESIZE
 size = (width, height)
 RADIUS = int(SQUARESIZE/2 - 5)
 screen = pygame.display.set_mode(size)
+game_intro()
 draw_board(board)
 pygame.display.update()
 myfont = pygame.font.SysFont("monospace", 75)
+# clock = pygame.time.Clock()
 #utilisation du random pour savoir qui commence
 turn = random.randint(PLAYER, AI)
 #Lancement du jeu
