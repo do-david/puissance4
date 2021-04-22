@@ -207,10 +207,15 @@ print_board(board)
 game_over = False
 
 pygame.init()
+lvl = -1
 nb_player = -1
 #0: AI vs AI || 1: Player vs AI || 2: Player vs Player
 while nb_player < 0 or nb_player > 2:
 	nb_player = int(input("Nombre de joueur :"))
+#Choix du niveau
+while lvl < 1 or lvl > 10:
+	lvl = int(input("Choix du niveau de difficulte (1-10):"))
+
 #Implémentation graphique
 SQUARESIZE = 100
 width = COLUMN_COUNT * SQUARESIZE
@@ -247,7 +252,7 @@ while not game_over:
 					posx = event.pos[0]
 					col = int(math.floor(posx/SQUARESIZE))
 				else :
-					col, minimax_score = minimax(board, 5, -math.inf, math.inf, True)
+					col, minimax_score = minimax(board, lvl, -math.inf, math.inf, True)
 
 				if is_valid_location(board, col):
 					row = get_next_open_row(board, col)
@@ -273,7 +278,7 @@ while not game_over:
 						posx = event.pos[0]
 						col = int(math.floor(posx/SQUARESIZE))
 				else :
-					col, minimax_score = minimax(board, 5, -math.inf, math.inf, True)
+					col, minimax_score = minimax(board, lvl, -math.inf, math.inf, True)
 				if is_valid_location(board, col):
 					#pygame.time.wait(500)
 					row = get_next_open_row(board, col)
