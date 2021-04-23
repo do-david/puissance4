@@ -335,14 +335,6 @@ board = create_board()
 print_board(board)
 gameIsOver = False
 pygame.init()
-#lvl = -1
-# nb_player = -1
-#0: AI vs AI || 1: Player vs AI || 2: Player vs Player
-# while nb_player < 0 or nb_player > 2:
-# 	nb_player = int(input("Nombre de joueur :"))
-#Choix du niveau
-# while lvl < 1 or lvl > 6:
-# 	lvl = int(input("Choix du niveau de difficulte (1-6):"))
 
 #Implémentation graphique
 SQUARESIZE = 100
@@ -352,19 +344,14 @@ size = (width, height)
 RADIUS = int(SQUARESIZE/2 - 5)
 screen = pygame.display.set_mode(size)
 res = game_intro()
-print(res)
 if(len(res) <2 and res[0] == 2):
     nb_player = res[0]
-    print('nb_player = ',nb_player)
 else:
     nb_player = res[0]
-    print('nb_player = ',nb_player)
     lvl = res[1]
-    print('lvl = ',lvl)
 draw_board(board)
 pygame.display.update()
 myfont = pygame.font.SysFont("monospace", 75)
-# clock = pygame.time.Clock()
 #utilisation du random pour savoir qui commence
 turn = random.randint(PLAYER, AI)
 #Lancement du jeu
@@ -384,7 +371,6 @@ while not gameIsOver:
 
 		if event.type == pygame.MOUSEBUTTONDOWN:
 			pygame.draw.rect(screen, BLACK, (0,0, width, SQUARESIZE))
-			#print(event.pos)
 			# Ask for Player 1 Input
 			if turn == PLAYER:
 				if nb_player >= 1:
@@ -409,17 +395,14 @@ while not gameIsOver:
 					draw_board(board)
 
 
-			# # Ask for Player 2 Input
+			# Ask for Player 2 Input
 			else:				
-				#col = random.randint(0, COLUMN_COUNT-1)
-				#col = pick_best_move(board, AI_PIECE)
 				if nb_player > 1:
 						posx = event.pos[0]
 						col = int(math.floor(posx/SQUARESIZE))
 				else :
 					col, minimax_score = minimax(board, lvl, -math.inf, math.inf, True)
 				if is_valid_location(board, col):
-					#pygame.time.wait(500)
 					row = get_next_open_row(board, col)
 					drop_piece(board, row, col, AI_PIECE)
 
