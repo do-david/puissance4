@@ -39,7 +39,7 @@ def get_next_open_row(board, col):
 def print_board(board):
 	print(np.flip(board, 0))
 
-def winning_move(board, piece):
+def game_over(board, piece):
 	# Check horizontal locations for win
 	for c in range(COLUMN_COUNT-3):
 		for r in range(ROW_COUNT):
@@ -82,7 +82,7 @@ def evaluate_window(window, piece):
 
 	return score
 
-def score_position(board, piece):
+def evaluate(board, piece):
 	score = 0
 
 	## Score center column
@@ -118,21 +118,21 @@ def score_position(board, piece):
 	return score
 
 def is_terminal_node(board):
-	return winning_move(board, PLAYER_PIECE) or winning_move(board, AI_PIECE) or len(get_valid_locations(board)) == 0
+	return game_over(board, PLAYER_PIECE) or game_over(board, AI_PIECE) or len(get_valid_locations(board)) == 0
 
 def minimax(board, depth, alpha, beta, maximizingPlayer):
 	valid_locations = get_valid_locations(board)
 	is_terminal = is_terminal_node(board)
 	if depth == 0 or is_terminal:
 		if is_terminal:
-			if winning_move(board, AI_PIECE):
+			if game_over(board, AI_PIECE):
 				return (None, 100000000000000)
-			elif winning_move(board, PLAYER_PIECE):
+			elif game_over(board, PLAYER_PIECE):
 				return (None, -10000000000000)
 			else: # Game is over, no more valid moves
 				return (None, 0)
 		else: # Depth is zero
-			return (None, score_position(board, AI_PIECE))
+			return (None, evaluate(board, AI_PIECE))
 	if maximizingPlayer:
 		value = -math.inf
 		column = random.choice(valid_locations)
@@ -181,7 +181,7 @@ def pick_best_move(board, piece):
 		row = get_next_open_row(board, col)
 		temp_board = board.copy()
 		drop_piece(temp_board, row, col, piece)
-		score = score_position(temp_board, piece)
+		score = evaluate(temp_board, piece)
 		if score > best_score:
 			best_score = score
 			best_col = col
@@ -207,6 +207,8 @@ def text_objects(text, font):
     return textSurface, textSurface.get_rect()
 
 def game_intro():
+    #retourne nb_player et le palier de difficulté
+    res = []
     intro = True
     startClicked = False
     while intro:
@@ -215,22 +217,23 @@ def game_intro():
                 pygame.quit()
                 quit()
             if event.type == pygame.MOUSEBUTTONDOWN:
-                if width/2 <= mouse[0] <= width/2+140 and (height/2) <= mouse[1] <= (height/2)+140:
+                if width/2 <= mouse[0] <= width/2+150 and (height/2) <= mouse[1] <= (height/2)+150:
                     print('start button clicked')
                     startClicked = True
                     continue
                 if width/5 <= mouse[0] <= width/5+100 and (height/4) <= mouse[1] <= (height*3/4)+100 and startClicked:
                     print('this is easy')
+                    res.append(random.randint(1,2))
                     intro = False
                 if width/2 <= mouse[0] <= width/2+100 and (height*3/4) <= mouse[1] <= (height*3/4)+100 and startClicked:
                     print('this is medium')
+                    res.append(random.randint(3,4))
                     intro = False
                 if width*4/5 <= mouse[0] <= width*4/5+100 and (height/4) <= mouse[1] <= (height*3/4)+100 and startClicked:
-                    print('this is easy')
+                    print('this is hard')
+                    res.append(random.randint(5,6))
                     intro = False
-        pygame.display.update()
         if(startClicked):
-            print('condition valid')
             smallText = pygame.font.Font('freesansbold.ttf',35)
             Text1Surf, Text1Rect = text_objects("Easy", smallText)
             Text2Surf, Text2Rect = text_objects("Medium", smallText)
@@ -252,23 +255,23 @@ def game_intro():
         ButtonSurf, ButtonRect = text_objects("Start", mediumText)
         ButtonRect.center = ((width/2),(height/2))
         screen.blit(ButtonSurf, ButtonRect)
-        pygame.display.update()
+    return res
         
 pygame.display.set_caption('Puissance 4')
 black = (0,0,0)
 white = (255,255,255)
 board = create_board()
 print_board(board)
-game_over = False
+gameIsOver = False
 pygame.init()
-lvl = -1
+#lvl = -1
 nb_player = -1
 #0: AI vs AI || 1: Player vs AI || 2: Player vs Player
 while nb_player < 0 or nb_player > 2:
 	nb_player = int(input("Nombre de joueur :"))
 #Choix du niveau
-while lvl < 1 or lvl > 6:
-	lvl = int(input("Choix du niveau de difficulte (1-6):"))
+# while lvl < 1 or lvl > 6:
+# 	lvl = int(input("Choix du niveau de difficulte (1-6):"))
 
 #Implémentation graphique
 SQUARESIZE = 100
@@ -277,7 +280,9 @@ height = (ROW_COUNT+1) * SQUARESIZE
 size = (width, height)
 RADIUS = int(SQUARESIZE/2 - 5)
 screen = pygame.display.set_mode(size)
-game_intro()
+res = game_intro()
+lvl = res[0]
+print('lvl = ',lvl)
 draw_board(board)
 pygame.display.update()
 myfont = pygame.font.SysFont("monospace", 75)
@@ -285,7 +290,7 @@ myfont = pygame.font.SysFont("monospace", 75)
 #utilisation du random pour savoir qui commence
 turn = random.randint(PLAYER, AI)
 #Lancement du jeu
-while not game_over:
+while not gameIsOver:
 
 	for event in pygame.event.get():
 		if event.type == pygame.QUIT:
@@ -314,10 +319,10 @@ while not game_over:
 					row = get_next_open_row(board, col)
 					drop_piece(board, row, col, PLAYER_PIECE)
 
-					if winning_move(board, PLAYER_PIECE):
+					if game_over(board, PLAYER_PIECE):
 						label = myfont.render("Player 1 wins!!", 1, RED)
 						screen.blit(label, (40,10))
-						game_over = True
+						gameIsOver = True
 
 					turn += 1
 					turn = turn % 2
@@ -340,10 +345,10 @@ while not game_over:
 					row = get_next_open_row(board, col)
 					drop_piece(board, row, col, AI_PIECE)
 
-					if winning_move(board, AI_PIECE):
+					if game_over(board, AI_PIECE):
 						label = myfont.render("Player 2 wins!!", 1, YELLOW)
 						screen.blit(label, (40,10))
-						game_over = True
+						gameIsOver = True
 
 					print_board(board)
 					draw_board(board)
@@ -351,5 +356,5 @@ while not game_over:
 					turn += 1
 					turn = turn % 2
 
-	if game_over:
+	if gameIsOver:
 		pygame.time.wait(3000)
